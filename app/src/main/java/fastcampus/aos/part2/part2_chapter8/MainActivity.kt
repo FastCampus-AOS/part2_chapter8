@@ -2,6 +2,7 @@ package fastcampus.aos.part2.part2_chapter8
 
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -12,6 +13,9 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import fastcampus.aos.part2.part2_chapter8.databinding.ActivityMainBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -27,6 +31,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.mapView.onCreate(savedInstanceState)
 
         binding.mapView.getMapAsync(this)
+
+        SearchRepository.getGoodRestaurant("서울").enqueue(object : Callback<SearchResult> {
+            override fun onResponse(
+                call: Call<SearchResult?>,
+                response: Response<SearchResult?>
+            ) {
+                Log.e("hyunsu", "Response: ${response.body()}")
+            }
+
+            override fun onFailure(
+                call: Call<SearchResult?>,
+                t: Throwable
+            ) {
+                Log.e("hyunsu", "Throwable: $t")
+            }
+        })
     }
 
     override fun onStart() {
