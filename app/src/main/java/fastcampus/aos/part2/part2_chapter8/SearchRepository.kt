@@ -23,7 +23,7 @@ object SearchRepository {
 
     private val service = retrofit.create(SearchService::class.java)
 
-    fun getGoodRestaurant(query: String): Call<SearchResult> = service.getGoodRestaurant(query = "$query 맛집", display = 5)
+    fun getGoodRestaurant(query: String): Call<SearchResult> = service.getGoodRestaurant(query = "$query 맛집", display = 30)
 
     class AppInterceptor: Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {

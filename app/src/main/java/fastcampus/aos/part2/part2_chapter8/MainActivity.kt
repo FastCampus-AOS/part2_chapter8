@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.geometry.Tm128
 import com.naver.maps.map.CameraAnimation
@@ -17,6 +18,7 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
 import fastcampus.aos.part2.part2_chapter8.databinding.ActivityMainBinding
+import okhttp3.internal.notify
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,6 +30,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var naverMap: NaverMap
     private var isMapInit = false
 
+    private var restaurantListAdapter = RestaurantListAdapter {
+        moveCamera(it)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -36,6 +42,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.mapView.onCreate(savedInstanceState)
 
         binding.mapView.getMapAsync(this)
+
+        binding.bottomSheetLayout.searchResultRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = restaurantListAdapter
+        }
 
         binding.searchView.setOnQueryTextListener(object : OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -69,15 +80,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                                     }
                                 }
 
-                                searchItemList.forEach {
-                                    Log.e("hyunsu", "검색 좌표 title: ${it.title}, mapx: ${it.mapx}, mapy: ${it.mapy}")
-                                }
-
-                                val cameraUpdate = CameraUpdate.scrollTo(markers.first().position)
-                                    .animate(CameraAnimation.Easing)
-                                naverMap.moveCamera(cameraUpdate)
-
-
+                                moveCamera(markers.first().position)
+                                restaurantListAdapter.setData(searchItemList)
                             }
 
                             override fun onFailure(
@@ -98,6 +102,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 return true
             }
         })
+    }
+
+    private fun moveCamera(position: LatLng) {
+        if (isMapInit.not()) return
+
+        val cameraUpdate = CameraUpdate.scrollTo(position)
+            .animate(CameraAnimation.Easing)
+        naverMap.moveCamera(cameraUpdate)
     }
 
     override fun onStart() {
